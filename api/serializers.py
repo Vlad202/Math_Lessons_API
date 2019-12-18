@@ -1,9 +1,8 @@
 from rest_framework import serializers
-from .models import LessonArticle
+from api.models import LessonArticle
 
 class LessonArticleDetailSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    
     class Meta:
         model = LessonArticle
         fields ='__all__'
