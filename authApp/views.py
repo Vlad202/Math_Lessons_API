@@ -23,7 +23,7 @@ class EmailVerificationView(APIView):
 
         email_vr_user = EmailVerification.objects.get(email_hash=email_hash)
         if email_vr_user is None:
-            return Response({'error': 'unknow user'})
+            return Response({'error': 'unknown user'})
         else:
             user = UserModel.objects.create(
                 username=email_vr_user.username,
@@ -59,6 +59,8 @@ class SinginUserView(APIView):
 
         username = request.POST["username"]
         password = request.POST["password"]
+
+        user = authenticate(username=username, password=password)
 
         if user.is_staff == True:
             token = UserToken.objects.get(user=user.id).token

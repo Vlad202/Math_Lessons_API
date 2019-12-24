@@ -11,13 +11,18 @@ class EmailVerification(models.Model):
     last_name = models.CharField(max_length=30)
     email = models.CharField(max_length=30)
     password = models.CharField(max_length=30)
+    def __str__(self):
+        return self.username
 
 class UserToken(models.Model):
     token = models.CharField(max_length=64)
-
     user = models.ForeignKey(User, verbose_name='User', on_delete=models.CASCADE)
+    def __str__(self):
+        return self.token
 
 class UserAgent(models.Model):
     user = models.ForeignKey(User, verbose_name='User', on_delete=models.CASCADE, default="")
     ipAgent = models.CharField(max_length=128, verbose_name="ip_agent")
     email = models.CharField(max_length=128, verbose_name="ban_email")
+    def __str__(self):
+        return self.email

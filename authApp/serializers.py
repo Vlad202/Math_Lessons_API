@@ -22,7 +22,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
         user_agent = request.META.get('HTTP_USER_AGENT')
         ip += user_agent
         hash_ip = hashlib.md5(ip.encode('utf-8')).hexdigest()
-        if BanUserModel.objects.filter(email="email").exists() and BanUserModel.objects.get(ip_agent=hash_ip).filter() is not True:
+        if BanUserModel.objects.filter(email="email").exists() is not True and BanUserModel.objects.filter(ip_agent=hash_ip).exists() is not True:
             if validated_data["email"] and UserModel.objects.filter(email=validated_data["email"]).exists():
                 error = {'error': 'email is not unique'}
                 raise serializers.ValidationError(error)
