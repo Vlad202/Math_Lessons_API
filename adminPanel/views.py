@@ -7,11 +7,12 @@ from adminPanel.serializers import UsersListSetSerializer, BanUserSerializer, Cr
 from adminPanel.models import BanUserModel, GlobalThemeModel, SubtopicModel, TestModel
 from authApp.models import UserAgent, UserToken
 from adminPanel.permisions import is_staff_only
+import base64
 
 class ThemeListView(APIView):
     serializer = ThemeListSerializer
     def get(self, request):
-        if is_staff_only(request.COOKIES["Cookie"]):
+        if is_staff_only(request.COOKIES["Token"]):
             themes = GlobalThemeModel.objects.all()
             themes_queryset = []
             for theme in themes:
@@ -23,7 +24,7 @@ class ThemeListView(APIView):
 class UsersListView(APIView):
     serializer = UsersListSetSerializer
     def get(self, request):
-        if is_staff_only(request.COOKIES["Cookie"]):
+        if is_staff_only(request.COOKIES["Token"]):
             users = User.objects.all()
             users_queryset = []
             for user in users:
@@ -36,7 +37,7 @@ class UsersListView(APIView):
 class GiveBanView(APIView):
     serializer = BanUserSerializer
     def post(self, request):
-        if is_staff_only(request.COOKIES["Cookie"]):
+        if is_staff_only(request.COOKIES["Token"]):
             try:
                 bad_user_email = UserAgent.objects.get(email=request.POST['email'])
             except:
@@ -54,10 +55,10 @@ class GiveBanView(APIView):
         else:
             return Response({'error': 'invalid token'})
 
-class Createtheme(APIView):
+class CreateThemeView(APIView):
     serializer = CreateThemeSerializer
     def post(self, request):
-        if is_staff_only(request.COOKIES["Cookie"]):
+        if is_staff_only(request.COOKIES["Token"]):
             theme = GlobalThemeModel.objects.create(
                 header = request.POST["header"]
             )
@@ -69,7 +70,8 @@ class Createtheme(APIView):
 class EditThemeView(APIView):
     serializer = CreateThemeSerializer
     def post(self, request, theme):
-        if is_staff_only(request.COOKIES["Cookie"]):
+        theme = (base64.b64decode(theme)).decode('UTF-8')
+        if is_staff_only(request.COOKIES["Token"]):
             try:
                 global_theme = GlobalThemeModel.objects.get(header=theme)
             except:
@@ -80,10 +82,27 @@ class EditThemeView(APIView):
         else:
             return Response({'error': 'invalid token'})    
 
+class DeleteThemeView(APIView):
+    serializeer = CreateThemeSerializer
+    def get(self, request, theme):
+        theme = (base64.b64decode(theme)).decode('UTF-8')
+        if is_staff_only(request.COOKIES["Token"]):
+            try:
+                global_theme = GlobalThemeModel.objects.get(header=theme)
+            except:
+                return Response({'error': 'unknown theme'})
+            global_theme.delete()
+            return Response({'success': 'theme has been delited'})
+        else:
+            return Response({'error': 'invalid token'})
+        
+
+
 class EditSubtopicView(APIView):
     serializer = CreateTopicSerializer
     def post(self, request, subtopic):
-        if is_staff_only(request.COOKIES["Cookie"]):
+        theme = (base64.b64decode(subtopic)).decode('UTF-8')
+        if is_staff_only(request.COOKIES["Token"]):
             try:
                 subtopic = SubtopicModel.objects.get(header=subtopic)
             except:
@@ -93,12 +112,26 @@ class EditSubtopicView(APIView):
             subtopic.save()
             return Response({'success': 'topic has been edited'})
         else:
+            return Response({'error': 'invalid token'})
+
+class DeleteSubtopicView(APIView):
+    serializer = CreateTopicSerializer
+    def post(self, request, subtopic):
+        theme = (base64.b64decode(subtopic)).decode('UTF-8')
+        if is_staff_only(request.COOKIES["Token"]):
+            try:
+                subtopic = SubtopicModel.objects.get(header=subtopic)
+            except:
+                return Response({'error': 'unknown subtopic'})
+            subtopic.delete()
+            return Response({'success': 'topic has been deleted'})
+        else:
             return Response({'error': 'invalid token'})  
 
 class EditTestView(APIView):
     serializer = CreateTestSerializer
-    def post(seld, request, id):
-        if is_staff_only(request.COOKIES["Cookie"]):
+    def post(self, request, id):
+        if is_staff_only(request.COOKIES["Token"]):
             try:
                 test = TestModel.objects.get(id=id)
             except:
@@ -110,10 +143,39 @@ class EditTestView(APIView):
         else:
             return Response({'error': 'invalid token'})  
 
-class CreatetopicView(APIView):
+class EditTestView(APIView):
+    serializer = CreateTestSerializer
+    def post(self, request, id):
+        if is_staff_only(request.COOKIES["Token"]):
+            try:
+                test = TestModel.objects.get(id=id)
+            except:
+                return Response({'error': 'unknown subtopic or test'})
+            test.question = request.POST["question"]
+            test.answer = request.POST["answer"]
+            test.save()
+            return Response({'success': 'test has been edited'})
+        else:
+            return Response({'error': 'invalid token'}) 
+
+class DeleteTestView(APIView):
+    serializer = CreateTestSerializer
+    def post(self, request, id):
+        if is_staff_only(request.COOKIES["Token"]):
+            try:
+                test = TestModel.objects.get(id=id)
+            except:
+                return Response({'error': 'unknown subtopic or test'})
+            test.delete()
+            return Response({'success': 'test has been edited'})
+        else:
+            return Response({'error': 'invalid token'})
+
+class CreateTopicView(APIView):
     serializer = CreateTopicSerializer
-    def get(seld, request, theme):
-        if is_staff_only(request.COOKIES["Cookie"]):
+    def get(self, request, theme):
+        theme = (base64.b64decode(theme)).decode('UTF-8')
+        if is_staff_only(request.COOKIES["Token"]):
             try:
                 global_theme = GlobalThemeModel.objects.get(header=theme)
             except:
@@ -126,8 +188,9 @@ class CreatetopicView(APIView):
         else:
             return Response({'error': 'invalid token'})
 
-    def post(seld, request, theme):
-        if is_staff_only(request.COOKIES["Cookie"]):
+    def post(self, request, theme):
+        theme = (base64.b64decode(theme)).decode('UTF-8')
+        if is_staff_only(request.COOKIES["Token"]):
             try:
                 global_theme = GlobalThemeModel.objects.get(header=theme)
             except:
@@ -145,7 +208,8 @@ class CreatetopicView(APIView):
 class TestView(APIView):
     serializer = CreateTestSerializer
     def get(self, request, subtopic):
-        if is_staff_only(request.COOKIES["Cookie"]):
+        theme = (base64.b64decode(subtopic)).decode('UTF-8')
+        if is_staff_only(request.COOKIES["Token"]):
             try:
                 subtopic = SubtopicModel.objects.get(header=subtopic)
             except:
@@ -157,9 +221,12 @@ class TestView(APIView):
             return Response({'questions': test})
         else:
             return Response({'error': 'invalid token'})
-    
+
+class CreateTestView(APIView):
+    serializer = CreateTestSerializer
     def post(self, request, subtopic):
-        if is_staff_only(request.COOKIES["Cookie"]):
+        theme = (base64.b64decode(subtopic)).decode('UTF-8')
+        if is_staff_only(request.COOKIES["Token"]):
             try:
                 subtopic_model = SubtopicModel.objects.get(header=subtopic)
             except:

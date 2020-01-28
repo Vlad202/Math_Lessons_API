@@ -10,3 +10,11 @@ def is_staff_only(token):
             return False
     except: 
         return False
+
+def user_is_auth(token):
+    try:
+        UserToken.objects.get(token=token)
+    except:
+        return False
+    return True
+    return True
